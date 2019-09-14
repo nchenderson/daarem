@@ -1,4 +1,4 @@
-daarem_beta <- function(par, fixptfn, objfn, ..., control=list()) {
+daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
 
   control.default <- list(maxiter=2000, order=10, tol=1.e-08, mon.tol=0.01, cycl.mon.tol=0.0, kappa=25, alpha=1.2)
   namc <- names(control)
@@ -35,7 +35,6 @@ daarem_beta <- function(par, fixptfn, objfn, ..., control=list()) {
   lambda.ridge <- 100000
   r.penalty <- 0
   conv <- TRUE
-  #num.em <- 0  ## number of EM fallbacks
   ell.star <- obj_funvals[2]
   while(k < maxiter) {
     count <- count + 1
@@ -49,36 +48,35 @@ daarem_beta <- function(par, fixptfn, objfn, ..., control=list()) {
 
     np <- count
     if(np==1) {
-        Ftmp <- matrix(Fdiff[,1], nrow=length(fnew), ncol=np)
-        Xtmp <- matrix(Xdiff[,1], nrow=length(fnew), ncol=np)  ## is this matrix function needed?
+      Ftmp <- matrix(Fdiff[,1], nrow=length(fnew), ncol=np)
+      Xtmp <- matrix(Xdiff[,1], nrow=length(fnew), ncol=np)  ## is this matrix function needed?
     
-        pow <- kappa - shrink.count
-        s.delta <- exp(-0.5*log1p(a1^pow))
-        dsq <- sum(Fdiff[,count]*Fdiff[,count])
-        #dsq <- sum(Ftmp^2)
-        lambda.ridge <- dsq*(1/s.delta - 1)
-        ## What if dsq = 0?  
-        gamma_vec <- sum(Fdiff[,count]*fnew)/(dsq + lambda.ridge)  
-   
-        r.penalty = 0
+      #pow <- kappa - shrink.count
+      #s.delta <- exp(-0.5*log1p(a1^pow))
+      #dsq <- sum(Fdiff[,count]*Fdiff[,count])
+      #dsq <- sum(Ftmp^2)
+      #lambda.ridge <- dsq*(1/s.delta - 1)
+      ## What if dsq = 0?  
+      #gamma_vec <- sum(Fdiff[,count]*fnew)/(dsq + lambda.ridge)  
+      #r.penalty = 0
     } else {
         Ftmp <- Fdiff[,1:np]
         Xtmp <- Xdiff[,1:np]  
-
-        tmp <- La.svd(Ftmp)
-        dvec <- tmp$d
-        dvec.sq <- dvec*dvec
-        uy <- crossprod(tmp$u, fnew)
-        uy.sq <- uy*uy
-
-        ### Still need to compute Ftf
-        Ftf <- sqrt(sum(uy.sq*dvec.sq))
-        tmp_lam <- DampingFind(uy.sq, dvec, a1, kappa, shrink.count, Ftf, lambda.start=lambda.ridge, r.start=r.penalty)
-        lambda.ridge <- tmp_lam$lambda
-        r.penalty <- tmp_lam$rr
-        dd <- (dvec*uy)/(dvec.sq + lambda.ridge)
-        gamma_vec <- crossprod(tmp$vt, dd)
     }
+    tmp <- La.svd(Ftmp)
+    dvec <- tmp$d
+    dvec.sq <- dvec*dvec
+    uy <- crossprod(tmp$u, fnew)
+    uy.sq <- uy*uy
+
+    ### Still need to compute Ftf
+    Ftf <- sqrt(sum(uy.sq*dvec.sq))
+    tmp_lam <- DampingFind(uy.sq, dvec, a1, kappa, shrink.count, Ftf, lambda.start=lambda.ridge, r.start=r.penalty)
+    lambda.ridge <- tmp_lam$lambda
+    r.penalty <- tmp_lam$rr
+    dd <- (dvec*uy)/(dvec.sq + lambda.ridge)
+    gamma_vec <- crossprod(tmp$vt, dd)
+    
     
     if(class(gamma_vec) != "try-error"){
 
@@ -91,7 +89,7 @@ daarem_beta <- function(par, fixptfn, objfn, ..., control=list()) {
 
       if(class(new.objective.val) != "try-error" & !is.na(obj_funvals[k+1]) &
          !is.nan(new.objective.val)) {
-        if(new.objective.val >= obj_funvals[k+1] - mon.tol) {
+        if(new.objective.val >= obj_funvals[k+1] - mon.tol) {  ## just change this line in daarem_base_noobjfn
           ## Increase delta
           obj_funvals[k+2] <- new.objective.val
           fold <- fnew
