@@ -1,0 +1,8 @@
+Log of changes to daarem
+
+   o	first release (version 0.2):  August 6, 2018
+
+   o	second release (version 0.3):  February, 2019
+		-  fixed a bug in how the default order was determined
+		- fixed code for finding damping parameter; it can now handle the case 
+		  of one or more singular values that are numerically zero 
