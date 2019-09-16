@@ -21,7 +21,7 @@ daarem <- function(par, fixptfn, objfn, ..., control=list()) {
       ans <- daarem_base_objfn(par, fixptfn, objfn, maxiter, tol, mon.tol, 
                                cycl.mon.tol, a1, kappa, num.params, nlag, ...) 
   } else {
-      ans <- daarem_base_noobjfn(par, fixptfn, objfn, maxiter, tol, mon.tol, 
+      ans <- daarem_base_noobjfn(par, fixptfn, maxiter, tol, mon.tol, 
                                  cycl.mon.tol, a1, kappa, num.params, nlag, ...) 
   }
   if(!ans$convergence) {
