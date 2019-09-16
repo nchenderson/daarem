@@ -1,21 +1,16 @@
-daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
+daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol, 
+                              cycl.mon.tol, a1, kappa, num.params, nlag, ...) {
 
-  control.default <- list(maxiter=2000, order=10, tol=1.e-08, mon.tol=0.01, cycl.mon.tol=0.0, kappa=25, alpha=1.2)
-  namc <- names(control)
-  if (!all(namc %in% names(control.default))) {
-    stop("unknown names in control: ", namc[!(namc %in% names(control.default))])
-  }
-  control <- modifyList(control.default, control)
+ 
+  #maxiter <- control$maxiter
+  #tol <- control$tol
+  #mon.tol <- control$mon.tol  ## monotonicity tolerance
+  #cycl.mon.tol <- control$cycl.mon.tol
+  #a1 <- control$alpha
+  #kappa <- control$kappa
 
-  maxiter <- control$maxiter
-  tol <- control$tol
-  mon.tol <- control$mon.tol  ## monotonicity tolerance
-  cycl.mon.tol <- control$cycl.mon.tol
-  a1 <- control$alpha
-  kappa <- control$kappa
-
-  num.params <- length(par)
-  nlag <- min(control$order, ceiling(num.params/2))
+  #num.params <- length(par)
+  #nlag <- min(control$order, ceiling(num.params/2))
 
   Fdiff <- Xdiff <- matrix(0.0, nrow=num.params, ncol=nlag)
   obj_funvals <- rep(NA, maxiter + 2)
@@ -77,7 +72,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
     dd <- (dvec*uy)/(dvec.sq + lambda.ridge)
     gamma_vec <- crossprod(tmp$vt, dd)
     
-    
     if(class(gamma_vec) != "try-error"){
 
       xbar <- xnew - drop(Xtmp%*%gamma_vec)
@@ -105,7 +99,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
           xnew <- fold + xold
           obj_funvals[k+2] <- objfn(xnew, ...)
           obj.evals <- obj.evals + 1
-          #num.em <- num.em + 1
         }
       } else {
         ## Keep delta the same
@@ -116,7 +109,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
         obj_funvals[k+2] <- objfn(xnew, ...)
         obj.evals <- obj.evals + 1
         count <- 0
-        #num.em <- num.em + 1
       }
     } else {
       ## Keep delta the same
@@ -127,7 +119,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
       obj_funvals[k+2] <- objfn(xnew, ...)
       obj.evals <- obj.evals + 1
       count <- 0
-      #num.em <- num.em + 1
     }
     if(count==nlag) {
       count <- 0
@@ -147,7 +138,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, ..., control=list()) {
   value.obj <- objfn(xnew, ...)
   if(k >= maxiter) {
     conv <- FALSE
-    warning("Algorithm did not converge")
   }
   return(list(par=c(xnew), fpevals = k, value.objfn=value.obj, objfevals=obj.evals, convergence=conv, objfn.track=obj_funvals))
 }
