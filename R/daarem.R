@@ -1,6 +1,6 @@
 daarem <- function(par, fixptfn, objfn, ..., control=list()) {
 
-  control.default <- list(maxiter=2000, order=10, tol=1.e-08, mon.tol=0.01, cycl.mon.tol=0.0, kappa=25, alpha=1.2)
+  control.default <- list(maxiter=2000, order=5, tol=1.e-08, mon.tol=0.01, cycl.mon.tol=0.0, kappa=25, alpha=1.2)
   namc <- names(control)
   if (!all(namc %in% names(control.default))) {
     stop("unknown names in control: ", namc[!(namc %in% names(control.default))])
