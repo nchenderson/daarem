@@ -1,38 +1,37 @@
 daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, mon.tol, 
                                cycl.mon.tol, a1, kappa, num.params, nlag, ...) {
   
-  
   Fdiff <- Xdiff <- matrix(0.0, nrow=num.params, ncol=nlag)
-  obj_funvals <- rep(NA, maxiter + 2)
+  rho <- 0.95  ## should this be user specified?
   
+  resid_vals <- rep(NA, maxiter + 2)
   xold <- par
   xnew <- fixptfn(xold, ...)
-  #obj_funvals[1] <- objfn(xold, ...)
- # obj_funvals[2] <- objfn(xnew, ...)
-  
   fold <- xnew - xold
+  resid_vals[1] <- sqrt(crossprod(fold))
+  fnew <- fixptfn(xnew, ...) - xnew
+  resid_vals[2] <- sqrt(crossprod(fnew))
+  ss.resids <- resid_vals[2]
+  
+  fp.evals <- 2
   k <- 1
+  n.aa <- 0
   count <- 0
   shrink.count <- 0
   shrink.target <- 1/(1 + a1^kappa)
   lambda.ridge <- 100000
   r.penalty <- 0
   conv <- TRUE
-  new.objective.val <- 0
-  while(k < maxiter) {
+  while(fp.evals < maxiter) {
     count <- count + 1
-    
-    fnew <- fixptfn(xnew, ...) - xnew
-    ss.resids <- sqrt(crossprod(fnew))
-    if(ss.resids < tol & count==nlag) break
     
     Fdiff[,count] <- fnew - fold
     Xdiff[,count] <- xnew - xold
     
     np <- count
     if(np==1) {
-      Ftmp <- matrix(Fdiff[,1], nrow=length(fnew), ncol=np)
-      Xtmp <- matrix(Xdiff[,1], nrow=length(fnew), ncol=np)  
+      Ftmp <- matrix(Fdiff[,1], nrow=num.params, ncol=np)
+      Xtmp <- matrix(Xdiff[,1], nrow=num.params, ncol=np)  
     } else {
       Ftmp <- Fdiff[,1:np]
       Xtmp <- Xdiff[,1:np]  
@@ -53,59 +52,58 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, mon.tol,
     
     if(class(gamma_vec) != "try-error"){
       
-      xbar <- xnew - drop(Xtmp%*%gamma_vec)
-      fbar <- fnew - drop(Ftmp%*%gamma_vec)
-      
-      x.propose <- xbar + fbar
-      #new.objective.val <- try(objfn(x.propose, ...), silent=TRUE)
-
-      if(class(new.objective.val) != "try-error") {
-        if(TRUE) {  ## just change this line in daarem_base_noobjfn
+       xbar <- xnew - drop(Xtmp%*%gamma_vec)
+       fbar <- fnew - drop(Ftmp%*%gamma_vec)
+       x.propose <- xbar + fbar
+       
+       f.propose <- fixptfn(x.propose, ...) - x.propose
+       fp.evals <- fp.evals + 1
+       ss.propose <- sqrt(crossprod(f.propose))
+       if(ss.propose <= ss.resids*(1.001 + rho^n.aa)) {  
           ## Increase delta
           fold <- fnew
           xold <- xnew
-          
           xnew <- x.propose
+          fnew <- f.propose
+          
           shrink.count <- shrink.count + 1
-        } else {
+          ss.resids <- ss.propose
+          n.aa <- n.aa + 1
+       } else {
           ## Keep delta the same
           fold <- fnew
           xold <- xnew
-          
           xnew <- fold + xold
-        }
-      } else {
-        ## Keep delta the same
-        fold <- fnew
-        xold <- xnew
-        
-        xnew <- fold + xold
-        count <- 0
-      }
+          
+          fnew <- fixptfn(xnew, ...) - xnew
+          ss.resids <- sqrt(crossprod(fnew))
+          fp.evals <- fp.evals + 1
+       }
     } else {
       ## Keep delta the same
       fold <- fnew
       xold <- xnew
-      
       xnew <- fold + xold
+      
+      fnew <- fixptfn(xnew, ...) - xnew
+      ss.resids <- sqrt(crossprod(fnew))
       count <- 0
+      fp.evals <- fp.evals + 1
     }
+    if(ss.resids < tol & count==nlag) break
+    
+    resid_vals[k + 2] <- ss.resids
     if(count==nlag) {
       count <- 0
       ## restart count
-      ## make comparison here l.star vs. obj_funvals[k+2]
-      if(FALSE) {
-        ## Decrease delta
-        shrink.count <- max(shrink.count - nlag, -2*kappa)
-      }
-      #ell.star <- obj_funvals[k+2]
     }
     
     shrink.target <-  1/(1 + a1^(kappa - shrink.count))
     k <- k+1
   }
-  if(k >= maxiter) {
+  if(fp.evals >= maxiter) {
     conv <- FALSE
   }
-  return(list(par=c(xnew), fpevals = k, value.objfn=NULL, objfevals=NULL, convergence=conv, objfn.track=NULL))
+  return(list(par=c(xnew), fpevals = fp.evals, value.objfn=NULL, objfevals=NULL, convergence=conv, objfn.track=NULL,
+              residuals=resid_vals[!is.na(resid_vals)], n.aa=n.aa))
 }
