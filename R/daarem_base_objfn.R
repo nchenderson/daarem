@@ -43,8 +43,8 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
 
     np <- count
     if(np==1) {
-      Ftmp <- matrix(Fdiff[,1], nrow=length(fnew), ncol=np)
-      Xtmp <- matrix(Xdiff[,1], nrow=length(fnew), ncol=np)  ## is this matrix function needed?
+      Ftmp <- matrix(Fdiff[,1], nrow=num.params, ncol=np)
+      Xtmp <- matrix(Xdiff[,1], nrow=num.params, ncol=np)  ## is this matrix function needed?
     
       #pow <- kappa - shrink.count
       #s.delta <- exp(-0.5*log1p(a1^pow))
