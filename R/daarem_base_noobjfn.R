@@ -1,8 +1,8 @@
-daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, mon.tol, 
-                               cycl.mon.tol, a1, kappa, num.params, nlag, ...) {
+daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol, 
+                                a1, kappa, num.params, nlag, ...) {
   
   Fdiff <- Xdiff <- matrix(0.0, nrow=num.params, ncol=nlag)
-  rho <- 0.95  ## should this be user specified?
+  rho <- resid.tol ## should this be user specified?
   
   resid_vals <- rep(NA, maxiter + 2)
   xold <- par
@@ -59,7 +59,7 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, mon.tol,
        f.propose <- fixptfn(x.propose, ...) - x.propose
        fp.evals <- fp.evals + 1
        ss.propose <- sqrt(crossprod(f.propose))
-       if(ss.propose <= ss.resids*(1.001 + rho^n.aa)) {  
+       if(ss.propose <= ss.resids*(1.00 + rho^k)) {  
           ## Increase delta
           fold <- fnew
           xold <- xnew
