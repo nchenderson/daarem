@@ -6,3 +6,7 @@ Log of changes to daarem
 		- fixed a bug in how the default order was determined
 		- fixed code for finding damping parameter; it can now handle the case 
 		  of one or more singular values that are numerically zero 
+		  
+	 o  third release (version 0.4):  September, 2019
+	  - daarem can now handle cases where no objective function is 
+	    provided by the user and only the fixed point function is provided
