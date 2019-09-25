@@ -22,6 +22,11 @@ daarem <- function(par, fixptfn, objfn, ..., control=list()) {
       ans <- daarem_base_objfn(par, fixptfn, objfn, maxiter, tol, mon.tol, 
                                cycl.mon.tol, a1, kappa, num.params, nlag, ...) 
   } else {
+      if(!is.element("kappa", namc)) {
+        ## Set kappa to 100 if no objective function was provided.
+        warning("Note: kappa was set to 75 since no objective function was provided.")
+        kappa <- 75
+      }
       ans <- daarem_base_noobjfn(par, fixptfn, maxiter, tol, resid.tol, 
                                  a1, kappa, num.params, nlag, ...) 
   }
