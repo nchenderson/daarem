@@ -89,9 +89,7 @@ Default values of \code{control} are:
 	then greater than \eqn{1/2}{1/2} for all subsequent iterations. The relative damping factor is the ratio between
 	the norm of the unconstrained coefficients in Anderson acceleration and the norm of the damped coefficients.
 	In the absence of any monotonicity violations, the relative damping factor in iteration \eqn{k}{k} is
-	\eqn{1/(1 + \alpha^(\kappa - k))}{1/(1 + \alpha^(\kappa - k))}. Note that the default is \code{kappa=25}
-	whenever the user provides an objective function, and the default is \code{kappa=75} whenever the user does not provide
-	an objective function.
+	\eqn{1/(1 + \alpha^(\kappa - k))}{1/(1 + \alpha^(\kappa - k))}. 
 	}
 	\item{\code{alpha}}{A parameter \eqn{> 1}{> 1} that determines the initial relative damping factor and how quickly
 	the relative damping factor tends to one. The initial relative damping factor is \eqn{1/(1 + \alpha^\kappa)}{1/(1 + \alpha^\kappa)}.
@@ -99,8 +97,7 @@ Default values of \code{control} are:
 	\eqn{1/(1 + \alpha^(\kappa - k))}{1/(1 + \alpha^(\kappa - k))}.}
 	}
 	\item{\code{resid.tol}}{A nonnegative scalar \eqn{< 1}{< 1} that determines whether a residual change condition is violated.
-	The residual change condition is violated whenever \eqn{||x_k+1 - G(x_k+1)|| > ||x_k - G(x_k)|| (1 + resid.tol^k)}{|| G(x[k+1]) - x[k+1] || > || G(x[k]) - x[k] ||*(1 + resid.tol^k)}.
-	Default value of resid.tol is \code{0.95}.
+	The residual change condition is violated whenever \eqn{||x_k+1 - G(x_k+1)|| > ||x_k - G(x_k)|| (1 + resid.tol^k)}{|| G(x[k+1]) - x[k+1] || > || G(x[k]) - x[k] ||*(1 + resid.tol^k)}. Default value of resid.tol is \code{0.95}.
 	}
 	}
 }
