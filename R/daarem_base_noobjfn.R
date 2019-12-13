@@ -23,83 +23,70 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol,
   r.penalty <- 0
   conv <- TRUE
   while(fp.evals < maxiter) {
-    count <- count + 1
+     count <- count + 1
     
-    Fdiff[,count] <- fnew - fold
-    Xdiff[,count] <- xnew - xold
+     Fdiff[,count] <- fnew - fold
+     Xdiff[,count] <- xnew - xold
     
-    np <- count
-    if(np==1) {
-      Ftmp <- matrix(Fdiff[,1], nrow=num.params, ncol=np)
-      Xtmp <- matrix(Xdiff[,1], nrow=num.params, ncol=np)  
-    } else {
-      Ftmp <- Fdiff[,1:np]
-      Xtmp <- Xdiff[,1:np]  
-    }
-    tmp <- La.svd(Ftmp)
-    dvec <- tmp$d
-    dvec.sq <- dvec*dvec
-    uy <- crossprod(tmp$u, fnew)
-    uy.sq <- uy*uy
+     np <- count
+     if(np==1) {
+        Ftmp <- matrix(Fdiff[,1], nrow=num.params, ncol=np)
+        Xtmp <- matrix(Xdiff[,1], nrow=num.params, ncol=np)  
+     } else {
+        Ftmp <- Fdiff[,1:np]
+        Xtmp <- Xdiff[,1:np]  
+     }
+     tmp <- La.svd(Ftmp)
+     dvec <- tmp$d
+     dvec.sq <- dvec*dvec
+     uy <- crossprod(tmp$u, fnew)
+     uy.sq <- uy*uy
     
-    ### Still need to compute Ftf
-    Ftf <- sqrt(sum(uy.sq*dvec.sq))
-    tmp_lam <- DampingFind(uy.sq, dvec, a1, kappa, shrink.count, Ftf, lambda.start=lambda.ridge, r.start=r.penalty)
-    lambda.ridge <- tmp_lam$lambda
-    r.penalty <- tmp_lam$rr
-    dd <- (dvec*uy)/(dvec.sq + lambda.ridge)
-    gamma_vec <- crossprod(tmp$vt, dd)
+     ### Still need to compute Ftf
+     Ftf <- sqrt(sum(uy.sq*dvec.sq))
+     tmp_lam <- DampingFind(uy.sq, dvec, a1, kappa, shrink.count, Ftf, lambda.start=lambda.ridge, r.start=r.penalty)
+     lambda.ridge <- tmp_lam$lambda
+     r.penalty <- tmp_lam$rr
+     dd <- (dvec*uy)/(dvec.sq + lambda.ridge)
+     gamma_vec <- crossprod(tmp$vt, dd)
     
-    if(class(gamma_vec) != "try-error"){
-      
-       xbar <- xnew - drop(Xtmp%*%gamma_vec)
-       fbar <- fnew - drop(Ftmp%*%gamma_vec)
-       x.propose <- xbar + fbar
+     xbar <- xnew - drop(Xtmp%*%gamma_vec)
+     fbar <- fnew - drop(Ftmp%*%gamma_vec)
+     x.propose <- xbar + fbar
        
-       f.propose <- fixptfn(x.propose, ...) - x.propose
-       fp.evals <- fp.evals + 1
-       ss.propose <- sqrt(crossprod(f.propose))
-       if(ss.propose <= ss.resids*(1.00 + rho^k)) {  
-          ## Increase delta
-          fold <- fnew
-          xold <- xnew
-          xnew <- x.propose
-          fnew <- f.propose
+     f.propose <- fixptfn(x.propose, ...) - x.propose
+     fp.evals <- fp.evals + 1
+     ss.propose <- sqrt(crossprod(f.propose))
+     if(ss.propose <= ss.resids*(1.00 + rho^k)) {  
+         ## Increase delta
+         fold <- fnew
+         xold <- xnew
+         xnew <- x.propose
+         fnew <- f.propose
           
-          shrink.count <- shrink.count + 1
-          ss.resids <- ss.propose
-          n.aa <- n.aa + 1
-       } else {
-          ## Keep delta the same
-          fold <- fnew
-          xold <- xnew
-          xnew <- fold + xold
+         shrink.count <- shrink.count + 1
+         ss.resids <- ss.propose
+         n.aa <- n.aa + 1
+     } else {
+         ## Keep delta the same
+         fold <- fnew
+         xold <- xnew
+         xnew <- fold + xold
           
-          fnew <- fixptfn(xnew, ...) - xnew
-          ss.resids <- sqrt(crossprod(fnew))
-          fp.evals <- fp.evals + 1
-       }
-    } else {
-      ## Keep delta the same
-      fold <- fnew
-      xold <- xnew
-      xnew <- fold + xold
-      
-      fnew <- fixptfn(xnew, ...) - xnew
-      ss.resids <- sqrt(crossprod(fnew))
-      count <- 0
-      fp.evals <- fp.evals + 1
-    }
-    if(ss.resids < tol & count==nlag) break
+         fnew <- fixptfn(xnew, ...) - xnew
+         ss.resids <- sqrt(crossprod(fnew))
+         fp.evals <- fp.evals + 1
+     }
+
+     if(ss.resids < tol & count==nlag) break
     
-    resid_vals[k + 2] <- ss.resids
-    if(count==nlag) {
-      count <- 0
-      ## restart count
-    }
-    
-    shrink.target <-  1/(1 + a1^(kappa - shrink.count))
-    k <- k+1
+     resid_vals[k + 2] <- ss.resids
+     if(count==nlag) {
+        count <- 0
+        ## restart count
+     }
+     shrink.target <-  1/(1 + a1^(kappa - shrink.count))
+     k <- k+1
   }
   if(fp.evals >= maxiter) {
     conv <- FALSE
