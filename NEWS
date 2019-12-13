@@ -7,6 +7,10 @@ Log of changes to daarem
 		- fixed code for finding damping parameter; it can now handle the case 
 		  of one or more singular values that are numerically zero 
 		  
-	 o  third release (version 0.4):  September, 2019
+   o  third release (version 0.4):  September, 2019
 	  - daarem can now handle cases where no objective function is 
 	    provided by the user and only the fixed point function is provided
+	    
+   o  fourth release (version 0.4.1): December, 2019
+    - no updates to the functionality of daarem; only modified a
+      small chunk of related to checking a matrix class object
