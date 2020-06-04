@@ -1,5 +1,6 @@
 daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol, 
-                              cycl.mon.tol, a1, kappa, num.params, nlag, ...) {
+                              cycl.mon.tol, a1, kappa, num.params, nlag, 
+                              check.par.resid, ...) {
 
  
   #maxiter <- control$maxiter
@@ -36,8 +37,9 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
 
      fnew <- fixptfn(xnew, ...) - xnew
      ss.resids <- sqrt(crossprod(fnew))
-     if(ss.resids < tol & count==nlag) break
-
+     if(ss.resids < tol & check.par.resid) break
+     #new.objective.val >= obj_funvals[k+1] - mon.tol
+     
      Fdiff[,count] <- fnew - fold
      Xdiff[,count] <- xnew - xold
 
@@ -46,14 +48,6 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
         Ftmp <- matrix(Fdiff[,1], nrow=num.params, ncol=np)
         Xtmp <- matrix(Xdiff[,1], nrow=num.params, ncol=np)  ## is this matrix function needed?
     
-        #pow <- kappa - shrink.count
-        #s.delta <- exp(-0.5*log1p(a1^pow))
-        #dsq <- sum(Fdiff[,count]*Fdiff[,count])
-        #dsq <- sum(Ftmp^2)
-        #lambda.ridge <- dsq*(1/s.delta - 1)
-        ## What if dsq = 0?  
-        #gamma_vec <- sum(Fdiff[,count]*fnew)/(dsq + lambda.ridge)  
-        #r.penalty = 0
      } else {
         Ftmp <- Fdiff[,1:np]
         Xtmp <- Xdiff[,1:np]  
@@ -79,7 +73,7 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
      new.objective.val <- try(objfn(x.propose, ...), silent=TRUE)
      obj.evals <- obj.evals + 1
 
-     if(class(new.objective.val) != "try-error" & !is.na(obj_funvals[k+1]) &
+     if(class(new.objective.val)[1] != "try-error" & !is.na(obj_funvals[k+1]) &
         !is.nan(new.objective.val)) {
          if(new.objective.val >= obj_funvals[k+1] - mon.tol) {  ## just change this line in daarem_base_noobjfn
             ## Increase delta
@@ -117,7 +111,10 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
             shrink.count <- max(shrink.count - nlag, -2*kappa)
          }
          ell.star <- obj_funvals[k+2]
-    }
+     }
+     if(abs(obj_funvals[k+2] - obj_funvals[k+1]) < tol & !check.par.resid) {
+         break
+     }
     shrink.target <-  1/(1 + a1^(kappa - shrink.count))
     k <- k+1
   }

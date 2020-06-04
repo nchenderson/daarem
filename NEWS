@@ -14,3 +14,8 @@ Log of changes to daarem
    o  fourth release (version 0.4.1): December, 2019
     - no updates to the functionality of daarem; only modified a
       small chunk of related to checking a matrix class object
+   
+   o  fifth release (version 0.5): June, 2020
+    - added option to determine convergence through differences in
+      the value of the objective function. One sets convtype="objfn"
+      if an objective function-based convergence criterion is deseired
