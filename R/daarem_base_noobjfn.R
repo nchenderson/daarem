@@ -78,9 +78,9 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol,
          fp.evals <- fp.evals + 1
      }
 
+     resid_vals[k + 2] <- ss.resids
      if(ss.resids < tol & count==nlag) break
     
-     resid_vals[k + 2] <- ss.resids
      if(count==nlag) {
         count <- 0
         ## restart count
