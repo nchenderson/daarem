@@ -1,8 +1,6 @@
 daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol, 
                               cycl.mon.tol, a1, kappa, num.params, nlag, 
-                              check.par.resid, ...) {
-
- 
+                              check.par.resid, intermed, ...) {
   #maxiter <- control$maxiter
   #tol <- control$tol
   #mon.tol <- control$mon.tol  ## monotonicity tolerance
@@ -32,13 +30,22 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
   r.penalty <- 0
   conv <- TRUE
   ell.star <- obj_funvals[2]
+  if(intermed) {
+     p.inter <- rbind(c(obj_funvals[1], par), c(obj_funvals[2], xnew))
+  } else {
+     p.inter <- NULL
+  }
   while(k < maxiter) {
      count <- count + 1
 
-     fnew <- fixptfn(xnew, ...) - xnew
+     ftmp <- try(fixptfn(xnew, ...)) 
+     if(class(ftmp)[1] == "try-error") {
+         break
+     } else {
+         fnew <- ftmp - xnew
+     }
      ss.resids <- sqrt(crossprod(fnew))
      if(ss.resids < tol & check.par.resid) break
-     #new.objective.val >= obj_funvals[k+1] - mon.tol
      
      Fdiff[,count] <- fnew - fold
      Xdiff[,count] <- xnew - xold
@@ -116,12 +123,22 @@ daarem_base_objfn <- function(par, fixptfn, objfn, maxiter, tol, mon.tol,
          break
      }
     shrink.target <-  1/(1 + a1^(kappa - shrink.count))
-    k <- k+1
+    if(intermed) {
+      p.inter <- rbind(p.inter, c(obj_funvals[k+2], xnew))
+    }
+    k <- k + 1
   }
   obj_funvals <- obj_funvals[!is.na(obj_funvals)]
   value.obj <- objfn(xnew, ...)
   if(k >= maxiter) {
-    conv <- FALSE
+     conv <- FALSE
   }
-  return(list(par=c(xnew), fpevals = k, value.objfn=value.obj, objfevals=obj.evals, convergence=conv, objfn.track=obj_funvals))
+  if(intermed) {
+     colnames(p.inter) <- c("ObjFn Value", rep("", length(xnew)))
+     if(k < maxiter) {
+         p.inter <- rbind(p.inter, c(value.obj, xnew))
+     }
+  }
+  return(list(par=c(xnew), fpevals = k, value.objfn=value.obj, objfevals=obj.evals, convergence=conv, 
+              objfn.track=obj_funvals, p.intermed=p.inter))
 }
