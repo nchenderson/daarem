@@ -1,5 +1,5 @@
 daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol, 
-                                a1, kappa, num.params, nlag, ...) {
+                                a1, kappa, num.params, nlag, intermed, ...) {
   
   Fdiff <- Xdiff <- matrix(0.0, nrow=num.params, ncol=nlag)
   rho <- resid.tol ## should this be user specified?
@@ -12,6 +12,12 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol,
   fnew <- fixptfn(xnew, ...) - xnew
   resid_vals[2] <- sqrt(crossprod(fnew))
   ss.resids <- resid_vals[2]
+  
+  if(intermed) {
+    p.inter <- rbind(par, xnew)
+  } else {
+    p.inter <- NULL
+  }
   
   fp.evals <- 2
   k <- 1
@@ -53,8 +59,14 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol,
      xbar <- xnew - drop(Xtmp%*%gamma_vec)
      fbar <- fnew - drop(Ftmp%*%gamma_vec)
      x.propose <- xbar + fbar
-       
-     f.propose <- fixptfn(x.propose, ...) - x.propose
+    
+     ftmp <- try(fixptfn(x.propose, ...)) 
+     if(class(ftmp)[1] == "try-error") {
+       break
+     } else {
+       f.propose <- ftmp - x.propose
+     }
+     #f.propose <- fixptfn(x.propose, ...) - x.propose
      fp.evals <- fp.evals + 1
      ss.propose <- sqrt(crossprod(f.propose))
      if(ss.propose <= ss.resids*(1.00 + rho^k)) {  
@@ -86,11 +98,14 @@ daarem_base_noobjfn <- function(par, fixptfn, maxiter, tol, resid.tol,
         ## restart count
      }
      shrink.target <-  1/(1 + a1^(kappa - shrink.count))
+     if(intermed) {
+       p.inter <- rbind(p.inter, xnew)
+     }
      k <- k+1
   }
   if(fp.evals >= maxiter) {
     conv <- FALSE
   }
   return(list(par=c(xnew), fpevals = fp.evals, value.objfn=NULL, objfevals=NULL, convergence=conv, objfn.track=NULL,
-              residuals=resid_vals[!is.na(resid_vals)], n.aa=n.aa))
+              residuals=resid_vals[!is.na(resid_vals)], p.intermed=p.inter))
 }
