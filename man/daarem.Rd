@@ -153,7 +153,7 @@ c(aa.probit$value, em.probit$value)
 # Accelerating using SQUAREM if the SQUAREM package is loaded
 # library(SQUAREM)
 # max.iter <- 5000
-# sq.probit <- squarem(par=beta.init, fixptfn = ProbitUpdate, objfn = ProbitLogLik,
+# sq.probit <- squarem(par=beta.init, fixptfn=ProbitUpdate, objfn=ProbitLogLik,
 #                     X=XX, y=yy, control=list(maxiter=max.iter))
 
 # print( c(aa.probit$fpevals, em.probit$fpevals, sq.probit$fpevals) )
