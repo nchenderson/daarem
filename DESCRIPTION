@@ -10,4 +10,3 @@ Description: Implements the DAAREM method for accelerating the convergence of sl
 License: GPL-2
 URL: https://doi.org/10.1080/10618600.2019.1594835
 Encoding: UTF-8
-LazyData: true
