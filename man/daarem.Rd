@@ -114,7 +114,7 @@ Default values of \code{control} are:
 }
 \references{
 Henderson, N.C. and Varadhan, R. (2019) \emph{Damped Anderson acceleration with restarts and monotonicity
-control for accelerating EM and EM-like algorithms}, \emph{Journal of Computational and Graphical Statistics, Vol. 28(4), 834-846.} \url{https://doi.org/10.1080/10618600.2019.1594835}
+control for accelerating EM and EM-like algorithms}, \emph{Journal of Computational and Graphical Statistics, Vol. 28(4), 834-846.} \doi{10.1080/10618600.2019.1594835}
 }
 \author{
 Nicholas Henderson and Ravi Varadhan
